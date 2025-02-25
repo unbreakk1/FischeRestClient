@@ -1,7 +1,6 @@
 package org.example.fischerestclient;
 
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -12,44 +11,21 @@ import java.util.Map;
 @RequestMapping("/api/")
 public class AsterixController
 {
-    private final RestTemplate restTemplate = new RestTemplate(); // TODO replace with "WebClient" later
+
+    private static final String BASE_API_URL = "https://rickandmortyapi.com/api";
+    private final RestTemplate restTemplate = new RestTemplate(); // TODO replace with WebClient later.
 
     @GetMapping("/characters")
     public List<Map<String, Object>> getAllCharacters()
     {
-        String url = "https://rickandmortyapi.com/api/character";
-        List<Map<String, Object>> characters = new ArrayList<>();
-        while (url != null)
-        {
-            Map response = restTemplate.getForObject(url, Map.class);
-
-            if (response != null)
-            {
-                List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
-
-                for (Map<String, Object> character : results)
-                {
-                    characters.add(Map.of(
-                            "id", character.get("id"),
-                            "name", character.get("name"),
-                            "species", character.get("species")));
-
-                }
-                Map<String, Object> info = (Map<String, Object>) response.get("info");
-                url = (String) info.get("next");
-            } else
-                url = null;
-        }
-        return characters;
+        return fetchCharactersPaginated(BASE_API_URL + "/character");
     }
 
     @GetMapping("/characters/{id}")
     public Map<String, Object> getCharacterById(@PathVariable int id)
     {
-        String url = "https://rickandmortyapi.com/api/character/" + id;
-
+        String url = BASE_API_URL + "/character/" + id;
         Map<String, Object> character = restTemplate.getForObject(url, Map.class);
-
         return Map.of(
                 "id", character.get("id"),
                 "name", character.get("name"),
@@ -57,62 +33,30 @@ public class AsterixController
         );
     }
 
-    @GetMapping("/characters/status")
+    @GetMapping("/by-status")
     public List<Map<String, Object>> getCharactersByStatus(@RequestParam String status)
     {
-        String url = "https://rickandmortyapi.com/api/character?status=" + status;
-        List<Map<String, Object>> filteredCharacters = new ArrayList<>();
-
-        while (url != null)
-        {
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
-            if (response != null)
-            {
-                List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
-
-                for (Map<String, Object> character : results)
-                {
-                    if (status.equalsIgnoreCase((String) character.get("status")))
-                        filteredCharacters.add(character);
-
-                }
-
-                Map<String, Object> info = (Map<String, Object>) response.get("info");
-                url = (String) info.get("next");
-            } else
-                url = null;
-
-        }
-        return filteredCharacters;
-
+        return fetchCharactersPaginated(BASE_API_URL + "/character?status=" + status);
     }
 
-    @GetMapping("/species-statistic")
+    @GetMapping("/statistics/species")
     public int getLivingCharactersBySpecies(@RequestParam String species)
     {
-        String url = "https://rickandmortyapi.com/api/character?status=alive";
+        String url = BASE_API_URL + "/character?status=alive";
         int count = 0;
 
         while (url != null)
         {
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
             if (response != null)
             {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
-
-                int speciesCount = 0;
                 for (Map<String, Object> character : results)
                 {
                     if (species.equalsIgnoreCase((String) character.get("species")))
-                    {
                         count++;
-                        speciesCount++;
-                    }
-                }
-                System.out.println("Processed page: " + url + ". Found " + speciesCount + " " + species + " characters on this page.");
 
+                }
                 Map<String, Object> info = (Map<String, Object>) response.get("info");
                 url = (String) info.get("next");
             }
@@ -120,7 +64,36 @@ public class AsterixController
                 url = null;
 
         }
-        System.out.println("Final count for species '" + species + "': " + count);
-        return count; // 211 characters
+
+        return count;
     }
+
+    private List<Map<String, Object>> fetchCharactersPaginated(String initialUrl)
+    {
+        String url = initialUrl;
+        List<Map<String, Object>> characters = new ArrayList<>();
+
+        while (url != null)
+        {
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response != null)
+            {
+                List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+                for (Map<String, Object> character : results)
+                {
+                    characters.add(Map.of(
+                            "id", character.get("id"),
+                            "name", character.get("name"),
+                            "species", character.get("species")
+                    ));
+                }
+                Map<String, Object> info = (Map<String, Object>) response.get("info");
+                url = (String) info.get("next");
+            } else
+                url = null;
+
+        }
+        return characters;
+    }
+
 }
