@@ -15,13 +15,14 @@ public class AsterixController
     private static final String BASE_API_URL = "https://rickandmortyapi.com/api";
     private final RestTemplate restTemplate = new RestTemplate(); // TODO replace with WebClient later.
 
-    @GetMapping("/characters")
+    @GetMapping("/characters")    //GET http://localhost:8080/api/characters
+
     public List<Map<String, Object>> getAllCharacters()
     {
         return fetchCharactersPaginated(BASE_API_URL + "/character");
     }
 
-    @GetMapping("/characters/{id}")
+    @GetMapping("/characters/{id}") // GET http://localhost:8080/api/characters/id
     public Map<String, Object> getCharacterById(@PathVariable int id)
     {
         String url = BASE_API_URL + "/character/" + id;
@@ -33,13 +34,13 @@ public class AsterixController
         );
     }
 
-    @GetMapping("/by-status")
+    @GetMapping("/by-status") // GET http://localhost:8080/api/by-status?status=Alive
     public List<Map<String, Object>> getCharactersByStatus(@RequestParam String status)
     {
         return fetchCharactersPaginated(BASE_API_URL + "/character?status=" + status);
     }
 
-    @GetMapping("/statistics/species")
+    @GetMapping("/statistics/species") // GET http://localhost:8080/api/statistics/species?species=Human
     public int getLivingCharactersBySpecies(@RequestParam String species)
     {
         String url = BASE_API_URL + "/character?status=alive";
