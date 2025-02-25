@@ -79,7 +79,6 @@ public class AsterixController
 
                 }
 
-                // Get the URL for the next page (if available)
                 Map<String, Object> info = (Map<String, Object>) response.get("info");
                 url = (String) info.get("next");
             } else {
