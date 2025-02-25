@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/")
+@RequestMapping("/api")
 public class AsterixController
 {
-
     private static final String BASE_API_URL = "https://rickandmortyapi.com/api";
     private final RestTemplate restTemplate = new RestTemplate(); // TODO replace with WebClient later.
 
@@ -94,6 +93,7 @@ public class AsterixController
                 url = null;
 
         }
+
         return characters;
     }
 
