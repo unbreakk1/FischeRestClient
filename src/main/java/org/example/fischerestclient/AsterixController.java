@@ -14,16 +14,16 @@ public class AsterixController
 {
     private final RestTemplate restTemplate = new RestTemplate(); // TODO replace with "WebClient" later
 
-    @GetMapping
-    public List<Map<String,Object>> getAllCharacters()
+    @GetMapping("/characters")
+    public List<Map<String, Object>> getAllCharacters()
     {
         String url = "https://rickandmortyapi.com/api/character";
-        List<Map<String,Object>> characters = new ArrayList<>();
-        while(url != null)
+        List<Map<String, Object>> characters = new ArrayList<>();
+        while (url != null)
         {
             Map response = restTemplate.getForObject(url, Map.class);
 
-            if(response != null)
+            if (response != null)
             {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
 
@@ -37,14 +37,13 @@ public class AsterixController
                 }
                 Map<String, Object> info = (Map<String, Object>) response.get("info");
                 url = (String) info.get("next");
-            }
-            else
+            } else
                 url = null;
-       }
+        }
         return characters;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/characters/{id}")
     public Map<String, Object> getCharacterById(@PathVariable int id)
     {
         String url = "https://rickandmortyapi.com/api/character/" + id;
@@ -58,7 +57,7 @@ public class AsterixController
         );
     }
 
-    @GetMapping("/status")
+    @GetMapping("/characters/status")
     public List<Map<String, Object>> getCharactersByStatus(@RequestParam String status)
     {
         String url = "https://rickandmortyapi.com/api/character?status=" + status;
@@ -81,11 +80,10 @@ public class AsterixController
 
                 Map<String, Object> info = (Map<String, Object>) response.get("info");
                 url = (String) info.get("next");
-            } else {
+            } else
                 url = null;
-            }
-        }
 
+        }
         return filteredCharacters;
 
     }
@@ -103,20 +101,26 @@ public class AsterixController
             if (response != null)
             {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+
+                int speciesCount = 0;
                 for (Map<String, Object> character : results)
                 {
                     if (species.equalsIgnoreCase((String) character.get("species")))
+                    {
                         count++;
-
+                        speciesCount++;
+                    }
                 }
+                System.out.println("Processed page: " + url + ". Found " + speciesCount + " " + species + " characters on this page.");
 
                 Map<String, Object> info = (Map<String, Object>) response.get("info");
                 url = (String) info.get("next");
             }
             else
                 url = null;
-        }
 
-        return count;
+        }
+        System.out.println("Final count for species '" + species + "': " + count);
+        return count; // 211 characters
     }
 }
